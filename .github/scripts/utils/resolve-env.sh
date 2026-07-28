@@ -23,7 +23,15 @@ elif [ "${EVENT_NAME}" = "pull_request" ]; then
   ENV="sit"
 elif [[ "${REF}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
   ENV="prod"
-elif [[ "${REF}" =~ ^refs/tags/daily-build- ]]; then
+elif [[ "${REF}" =~ ^refs/tags/prod- ]]; then
+  ENV="prod"
+elif [[ "${REF}" =~ ^refs/tags/sit- ]]; then
+  ENV="sit"
+# 运维 tag 一律带环境前缀(uat-daily-build-*, uat-platform-rebuild-*), 所以
+# daily-build 这一条不能锚在 ^refs/tags/ 上 —— 锚死了就匹配不到跨仓快照真正
+# 打出来的 uat-daily-build-*, 会掉进最后的 sit 兜底, Vault 再以 ref 绑定不符
+# 拒掉 OIDC claim。
+elif [[ "${REF}" =~ ^refs/tags/uat- ]] || [[ "${REF}" =~ daily-build- ]]; then
   ENV="uat"
 elif [ "${REF}" = "refs/heads/main" ]; then
   ENV="uat"
